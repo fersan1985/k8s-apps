@@ -8,5 +8,5 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 20Gi  # Ajustar según necesidades
-  storageClassName: local-path  # Ajustar según tu storageClass
+      storage: 20Gi  # Space for Docker images
+  storageClassName: rook-ceph-block  # Using Rook-Ceph storage

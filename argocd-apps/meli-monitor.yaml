@@ -6,7 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   annotations:
-    argocd.argoproj.io/sync-wave: "2"  # Wave 2: Apps after platform
+    argocd.argoproj.io/sync-wave: "3"  # Wave 3: Apps (depends on docker-registry)
 spec:
   project: default
 

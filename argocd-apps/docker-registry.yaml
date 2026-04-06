@@ -6,7 +6,7 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   annotations:
-    argocd.argoproj.io/sync-wave: "2"  # Wave 2: Apps after platform
+    argocd.argoproj.io/sync-wave: "2"  # Wave 2: Infrastructure (registry for app images)
 spec:
   project: default
 

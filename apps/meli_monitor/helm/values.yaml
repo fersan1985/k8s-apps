@@ -4,7 +4,9 @@ fullnameOverride: ""
 
 ## Configuración de la imagen
 image:
-  registry: registry.local:5000  # Cambiar por tu registry
+  # Internal cluster access (ClusterIP service)
+  registry: docker-registry.docker-registry.svc.cluster.local:5000
+  # External access for building: 192.168.0.34:30500
   repository: meli-monitor
   tag: "latest"
   pullPolicy: IfNotPresent
@@ -35,7 +37,7 @@ resources:
 ## Configuración del almacenamiento
 persistence:
   enabled: true
-  storageClass: "local-path"  # Cambiar según tu cluster
+  storageClass: "rook-ceph-block"  # Using Rook-Ceph storage
   accessMode: ReadWriteOnce
   size: 1Gi
 
