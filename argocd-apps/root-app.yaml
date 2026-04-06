@@ -1,23 +1,31 @@
+# App of Apps Pattern
+# This is the ONLY Application you need to apply manually
+# It will create all other Applications automatically
+
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: docker-registry
+  name: root-app
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   annotations:
-    argocd.argoproj.io/sync-wave: "2"  # Wave 2: Apps after platform
+    argocd.argoproj.io/sync-wave: "0"  # Deploy first
 spec:
   project: default
 
   source:
     repoURL: https://github.com/fersan1985/k8s-apps.git
     targetRevision: HEAD
-    path: apps/docker-registry/k8s
+    path: argocd-apps
+    directory:
+      recurse: false  # Only process files in argocd-apps/, not subdirectories
+      exclude: |
+        root-app.yaml  # Don't create Application for itself (avoid recursion)
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: docker-registry
+    namespace: argocd
 
   syncPolicy:
     automated:

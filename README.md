@@ -1,6 +1,8 @@
 # K8s Apps - GitOps Repository
 
-This repository contains all Kubernetes applications and platform components managed by ArgoCD.
+This repository contains all Kubernetes applications and platform components managed by ArgoCD using professional patterns: **App of Apps**, **ApplicationSets**, and **Sync Waves**.
+
+📖 **[Read PATTERNS.md](PATTERNS.md)** for detailed explanation of ArgoCD patterns used in this repo (QuickNode-style).
 
 ## Structure
 
@@ -47,17 +49,24 @@ argocd repo add https://github.com/fersan1985/k8s-apps.git
 Settings → Repositories → Connect Repo
 ```
 
-### 3. Deploy Platform Components
+### 3. Deploy Everything (App of Apps Pattern)
 
-Deploy KEDA via ArgoCD:
+Deploy **ONE** application that manages all others:
+
+```bash
+cd ~/Documents/project/kubernetes/k8s-apps
+kubectl apply -f argocd-apps/root-app.yaml
+```
+
+This will automatically create Applications for:
+- ✅ KEDA (Wave 1 - Platform)
+- ✅ docker-registry (Wave 2 - Apps)
+- ✅ meli-monitor (Wave 2 - Apps)
+
+**Alternative: Deploy individually (not recommended)**
 
 ```bash
 kubectl apply -f argocd-apps/keda.yaml
-```
-
-### 4. Deploy Applications
-
-```bash
 kubectl apply -f argocd-apps/docker-registry.yaml
 kubectl apply -f argocd-apps/meli-monitor.yaml
 ```

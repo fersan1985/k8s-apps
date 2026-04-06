@@ -1,0 +1,84 @@
+# ApplicationSet Pattern
+# Generates Applications dynamically from a list
+# Used at QuickNode for multi-cluster, multi-environment deployments
+
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform-components
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"  # Platform components first
+spec:
+  # Sync strategy
+  strategy:
+    type: RollingSync
+    rollingSync:
+      steps:
+        - matchExpressions:
+            - key: component
+              operator: In
+              values:
+                - keda
+        - matchExpressions:
+            - key: component
+              operator: In
+              values:
+                - ingress-nginx
+
+  # List generator: Define components to deploy
+  generators:
+    - list:
+        elements:
+          - component: keda
+            namespace: keda
+            chart: keda
+            chartRepo: https://kedacore.github.io/charts
+            version: "2.13.1"
+            wave: "1"
+
+          # Add more platform components here:
+          # - component: ingress-nginx
+          #   namespace: ingress-nginx
+          #   chart: ingress-nginx
+          #   chartRepo: https://kubernetes.github.io/ingress-nginx
+          #   version: "4.9.0"
+          #   wave: "1"
+
+  # Template for generating Applications
+  template:
+    metadata:
+      name: '{{component}}'
+      labels:
+        component: '{{component}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{wave}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+
+      sources:
+        - repoURL: '{{chartRepo}}'
+          chart: '{{chart}}'
+          targetRevision: '{{version}}'
+        - repoURL: https://github.com/fersan1985/k8s-apps.git
+          targetRevision: HEAD
+          ref: values
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+        retry:
+          limit: 3
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
