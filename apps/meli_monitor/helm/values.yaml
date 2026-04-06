@@ -1,0 +1,64 @@
+## Configuración global
+nameOverride: ""
+fullnameOverride: ""
+
+## Configuración de la imagen
+image:
+  registry: registry.local:5000  # Cambiar por tu registry
+  repository: meli-monitor
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+## Configuración del CronJob
+cronjob:
+  # Ejecutar cada 6 horas
+  schedule: "0 */6 * * *"
+  # Otras opciones de schedule:
+  # schedule: "0 */12 * * *"  # Cada 12 horas
+  # schedule: "0 9,21 * * *"  # A las 9 AM y 9 PM
+  # schedule: "0 0 * * *"     # Una vez al día
+
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  restartPolicy: OnFailure
+
+## Recursos del contenedor
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "200m"
+
+## Configuración del almacenamiento
+persistence:
+  enabled: true
+  storageClass: "local-path"  # Cambiar según tu cluster
+  accessMode: ReadWriteOnce
+  size: 1Gi
+
+## Productos a monitorear
+products:
+  urls:
+    - "https://www.mercadolibre.com.ar/procesador-amd-ryzen-9-9950x3d-16-nucleos-32-hilos-57ghz/up/MLAU3072665106"
+    # Agregar más URLs aquí:
+    # - "https://www.mercadolibre.com.ar/otro-producto/..."
+
+## Notificaciones
+notifications:
+  slack:
+    enabled: false
+    webhook: ""  # Se puede configurar via values o crear secret manualmente
+
+  discord:
+    enabled: false
+    webhook: ""  # Se puede configurar via values o crear secret manualmente
+
+## Si prefieres usar un secret existente:
+existingSecret: ""  # Nombre del secret con las keys: slack-webhook, discord-webhook
+
+## Namespace
+namespace: mercadolibre-monitor
+createNamespace: true

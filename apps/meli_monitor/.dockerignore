@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+.git/
+.gitignore
+README*.md
+KUBERNETES_DEPLOY.md
+k8s/
+meli
+.mercadolibre_monitor.json

@@ -1,0 +1,62 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "meli-monitor.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "meli-monitor.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.cronjob.schedule | quote }}
+  concurrencyPolicy: {{ .Values.cronjob.concurrencyPolicy }}
+  successfulJobsHistoryLimit: {{ .Values.cronjob.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.cronjob.failedJobsHistoryLimit }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: {{ include "meli-monitor.name" . }}
+        spec:
+          restartPolicy: {{ .Values.cronjob.restartPolicy }}
+          containers:
+          - name: monitor
+            image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            command: ["python", "mercadolibre_monitor.py", "check"]
+            env:
+            - name: DATA_FILE
+              value: "/data/.mercadolibre_monitor.json"
+            {{- if or .Values.notifications.slack.enabled .Values.existingSecret }}
+            - name: SLACK_WEBHOOK
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecret | default (printf "%s-secrets" (include "meli-monitor.fullname" .)) }}
+                  key: slack-webhook
+                  optional: true
+            {{- end }}
+            {{- if or .Values.notifications.discord.enabled .Values.existingSecret }}
+            - name: DISCORD_WEBHOOK
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecret | default (printf "%s-secrets" (include "meli-monitor.fullname" .)) }}
+                  key: discord-webhook
+                  optional: true
+            {{- end }}
+            volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: products
+              mountPath: /config
+            resources:
+              {{- toYaml .Values.resources | nindent 14 }}
+          volumes:
+          - name: data
+            {{- if .Values.persistence.enabled }}
+            persistentVolumeClaim:
+              claimName: {{ include "meli-monitor.fullname" . }}-data
+            {{- else }}
+            emptyDir: {}
+            {{- end }}
+          - name: products
+            configMap:
+              name: {{ include "meli-monitor.fullname" . }}-products

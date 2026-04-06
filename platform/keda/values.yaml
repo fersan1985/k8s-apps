@@ -1,0 +1,84 @@
+# KEDA Helm Values
+# Managed by ArgoCD
+# Repo: https://github.com/kedacore/charts
+
+# Operator configuration
+operator:
+  name: keda-operator
+  replicaCount: 1
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Metrics API Server
+metricsServer:
+  replicaCount: 1
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Admission Webhooks
+webhooks:
+  enabled: true
+  replicaCount: 1
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+# Service Account
+serviceAccount:
+  create: true
+  name: keda-operator
+
+# Prometheus metrics
+prometheus:
+  metricServer:
+    enabled: true
+    port: 9022
+    path: /metrics
+  operator:
+    enabled: true
+    port: 8080
+    path: /metrics
+  webhooks:
+    enabled: true
+    port: 8080
+    path: /metrics
+
+# Logging
+logging:
+  operator:
+    level: info
+    format: console
+  metricServer:
+    level: info
+
+# Security
+securityContext:
+  operator:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+  metricServer:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+  webhooks:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000

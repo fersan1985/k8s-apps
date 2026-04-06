@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "meli-monitor.fullname" . }}-products
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "meli-monitor.labels" . | nindent 4 }}
+data:
+  products.txt: |
+    {{- range .Values.products.urls }}
+    {{ . }}
+    {{- end }}

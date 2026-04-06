@@ -1,0 +1,59 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mercadolibre-monitor
+  namespace: mercadolibre-monitor
+spec:
+  # Ejecutar cada 6 horas
+  schedule: "0 */6 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: mercadolibre-monitor
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: monitor
+            image: mercadolibre-monitor:latest  # Cambiar por tu registry
+            imagePullPolicy: IfNotPresent
+            command: ["python", "mercadolibre_monitor.py", "check"]
+            env:
+            - name: DATA_FILE
+              value: "/data/.mercadolibre_monitor.json"
+            # Variables opcionales para notificaciones
+            - name: SLACK_WEBHOOK
+              valueFrom:
+                secretKeyRef:
+                  name: notification-secrets
+                  key: slack-webhook
+                  optional: true
+            - name: DISCORD_WEBHOOK
+              valueFrom:
+                secretKeyRef:
+                  name: notification-secrets
+                  key: discord-webhook
+                  optional: true
+            volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: products
+              mountPath: /config
+            resources:
+              requests:
+                memory: "128Mi"
+                cpu: "100m"
+              limits:
+                memory: "256Mi"
+                cpu: "200m"
+          volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: mercadolibre-data
+          - name: products
+            configMap:
+              name: mercadolibre-products

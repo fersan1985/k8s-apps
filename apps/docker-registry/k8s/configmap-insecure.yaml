@@ -1,0 +1,55 @@
+# ConfigMap para configurar Docker/Containerd para usar registry inseguro
+# Este configmap documenta la configuración necesaria en los nodos
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: registry-config-instructions
+  namespace: docker-registry
+data:
+  docker-daemon.json: |
+    {
+      "insecure-registries": ["registry.local:5000", "NODE_IP:30500"]
+    }
+
+  containerd-config.toml: |
+    # Para RKE2/K3s agregar en /etc/rancher/k3s/registries.yaml o /etc/rancher/rke2/registries.yaml
+    mirrors:
+      "registry.local:5000":
+        endpoint:
+          - "http://registry.local:5000"
+      "NODE_IP:30500":
+        endpoint:
+          - "http://NODE_IP:30500"
+
+    configs:
+      "registry.local:5000":
+        tls:
+          insecure_skip_verify: true
+      "NODE_IP:30500":
+        tls:
+          insecure_skip_verify: true
+
+  instructions.txt: |
+    Para configurar el registry en tus nodos RKE2:
+
+    1. Crear/editar archivo en cada nodo:
+       /etc/rancher/rke2/registries.yaml
+
+    2. Agregar:
+       mirrors:
+         "registry.local:5000":
+           endpoint:
+             - "http://NODE_IP:30500"
+
+       configs:
+         "registry.local:5000":
+           tls:
+             insecure_skip_verify: true
+
+    3. Reiniciar RKE2:
+       systemctl restart rke2-server  # o rke2-agent
+
+    4. Agregar entrada en /etc/hosts (o DNS):
+       NODE_IP registry.local
+
+    Donde NODE_IP es la IP de algún nodo del cluster.

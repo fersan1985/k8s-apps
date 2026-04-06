@@ -1,0 +1,29 @@
+# Ingress opcional - requiere un Ingress Controller (nginx, traefik, etc)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: docker-registry
+  namespace: docker-registry
+  annotations:
+    # Para nginx ingress controller:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    # Para Traefik:
+    # traefik.ingress.kubernetes.io/router.middlewares: default-registry-auth@kubernetescrd
+spec:
+  ingressClassName: nginx  # Cambiar según tu ingress controller
+  rules:
+  - host: registry.local  # Cambiar por tu dominio
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: docker-registry
+            port:
+              number: 5000
+  # Descomentar para HTTPS:
+  # tls:
+  # - hosts:
+  #   - registry.local
+  #   secretName: registry-tls

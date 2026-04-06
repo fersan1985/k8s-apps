@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mercadolibre-products
+  namespace: mercadolibre-monitor
+data:
+  products.txt: |
+    # Agregar URLs de productos a monitorear (una por línea)
+    https://www.mercadolibre.com.ar/procesador-amd-ryzen-9-9950x3d-16-nucleos-32-hilos-57ghz/up/MLAU3072665106
