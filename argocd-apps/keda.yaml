@@ -37,6 +37,8 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true  # Fix for large CRD annotations
+      - Replace=true  # Force replace instead of patch
     retry:
       limit: 3
       backoff:
