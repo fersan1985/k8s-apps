@@ -1,0 +1,46 @@
+# Cert-Manager Values for Homelab
+# Repo: https://github.com/cert-manager/cert-manager
+
+# Instalación de CRDs vía Helm
+installCRDs: true
+
+# Resources para los pods
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+# Webhook resources
+webhook:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+# CA Injector resources
+cainjector:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+# Metrics (para Prometheus)
+prometheus:
+  enabled: true
+  servicemonitor:
+    enabled: true
+    prometheusInstance: default
+
+# Configuración global
+global:
+  leaderElection:
+    namespace: cert-manager

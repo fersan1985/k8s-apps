@@ -1,0 +1,82 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: chain-custom-rules
+  namespace: monitoring
+  labels:
+    app: kube-prometheus-stack
+    release: prometheus-stack
+spec:
+  groups:
+  # Custom recording rules for chain namespaces
+  - name: chain.rules
+    interval: 30s
+    rules:
+      # Pod availability per chain
+      - record: chain:pod_availability:ratio
+        expr: |
+          sum by (namespace, chain) (
+            kube_pod_status_phase{namespace=~"chain-.*", phase="Running"}
+          ) /
+          sum by (namespace, chain) (
+            kube_pod_status_phase{namespace=~"chain-.*"}
+          )
+
+      # Container restarts per chain (last 15m)
+      - record: chain:container_restarts:rate15m
+        expr: |
+          rate(kube_pod_container_status_restarts_total{namespace=~"chain-.*"}[15m])
+
+      # CPU usage per chain
+      - record: chain:cpu_usage:sum
+        expr: |
+          sum by (namespace, chain) (
+            rate(container_cpu_usage_seconds_total{namespace=~"chain-.*", container!=""}[5m])
+          )
+
+      # Memory usage per chain
+      - record: chain:memory_usage:sum
+        expr: |
+          sum by (namespace, chain) (
+            container_memory_working_set_bytes{namespace=~"chain-.*", container!=""}
+          )
+
+  # Custom alerting rules for chain namespaces
+  - name: chain.alerts
+    interval: 30s
+    rules:
+      # Alert when chain pods are not running
+      - alert: ChainPodsNotRunning
+        expr: |
+          chain:pod_availability:ratio < 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: chain
+        annotations:
+          summary: "Chain {{ $labels.chain }} has low pod availability"
+          description: "Chain {{ $labels.chain }} in namespace {{ $labels.namespace }} has {{ $value | humanizePercentage }} pods running (threshold: 80%)"
+
+      # Alert on high restart rate
+      - alert: ChainHighRestartRate
+        expr: |
+          chain:container_restarts:rate15m > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          component: chain
+        annotations:
+          summary: "High restart rate for chain {{ $labels.chain }}"
+          description: "Chain {{ $labels.chain }} pod {{ $labels.pod }} is restarting at {{ $value | humanize }} restarts/sec"
+
+      # Alert when chain pod is CrashLooping
+      - alert: ChainPodCrashLooping
+        expr: |
+          rate(kube_pod_container_status_restarts_total{namespace=~"chain-.*"}[15m]) > 0
+        for: 5m
+        labels:
+          severity: critical
+          component: chain
+        annotations:
+          summary: "Chain pod is crash looping"
+          description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is crash looping"

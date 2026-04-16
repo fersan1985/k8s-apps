@@ -1,5 +1,4 @@
 # KEDA Helm Values
-# Managed by ArgoCD
 # Repo: https://github.com/kedacore/charts
 
 # Operator configuration
@@ -68,17 +67,4 @@ logging:
   metricServer:
     level: info
 
-# Security
-securityContext:
-  operator:
-    runAsNonRoot: true
-    runAsUser: 1000
-    fsGroup: 1000
-  metricServer:
-    runAsNonRoot: true
-    runAsUser: 1000
-    fsGroup: 1000
-  webhooks:
-    runAsNonRoot: true
-    runAsUser: 1000
-    fsGroup: 1000
+# Security - Removed invalid fsGroup from container context

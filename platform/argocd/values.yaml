@@ -1,0 +1,96 @@
+# ArgoCD Helm Values
+# Repo: https://github.com/argoproj/argo-helm/tree/main/charts/argo-cd
+
+# Global settings
+global:
+  domain: argocd.local
+
+# Server configuration
+server:
+  # Expose via NodePort for homelab access
+  service:
+    type: NodePort
+    nodePortHttp: 30080
+    nodePortHttps: 30443
+
+  # Ingress (optional, if you enable ingress-nginx later)
+  ingress:
+    enabled: false
+    ingressClassName: nginx
+    hosts:
+      - argocd.local
+    tls:
+      - secretName: argocd-tls
+        hosts:
+          - argocd.local
+
+  # Resources
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Controller configuration
+controller:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+
+# Repo server configuration
+repoServer:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+# Redis configuration
+redis:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# ApplicationSet controller
+applicationSet:
+  enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# Notifications controller
+notifications:
+  enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+# Configs
+configs:
+  params:
+    server.insecure: true  # For NodePort access without TLS
+  cm:
+    # Git repositories
+    repositories: |
+      - type: git
+        url: https://github.com/fersan1985/k8s-apps.git
