@@ -1,24 +1,35 @@
 ---
-# Ingress for ArgoCD with SSL/TLS
+# Ingress para ArgoCD con Let's Encrypt + ExternalDNS
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: argocd-server-ingress
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "4"  # Después de ClusterIssuer
-    cert-manager.io/cluster-issuer: "selfsigned-issuer"
-    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    # Sync wave - después de ClusterIssuer y LoadBalancer
+    argocd.argoproj.io/sync-wave: "5"
+
+    # Cert-Manager: Usa Let's Encrypt Production
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # Para testing inicial, usa: letsencrypt-staging
+
+    # ExternalDNS: Crea registro DNS automáticamente en Route53
+    external-dns.alpha.kubernetes.io/hostname: argocd.sanchezcloud.com
+
+    # Nginx Ingress
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+
 spec:
   ingressClassName: nginx
+
   tls:
   - hosts:
-    - argocd.home.local
-    secretName: argocd-server-tls
+    - argocd.sanchezcloud.com
+    secretName: argocd-sanchezcloud-tls  # Cert-Manager creará este certificado
+
   rules:
-  - host: argocd.home.local
+  - host: argocd.sanchezcloud.com
     http:
       paths:
       - path: /
@@ -27,4 +38,4 @@ spec:
           service:
             name: argocd-server
             port:
-              number: 443
+              number: 80
