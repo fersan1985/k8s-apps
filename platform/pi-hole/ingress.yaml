@@ -1,0 +1,51 @@
+---
+# Ingress para pihole con Let's Encrypt SSL + ExternalDNS
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pihole-ingress
+  namespace: default
+  annotations:
+    # Sync wave - después de ClusterIssuer y LoadBalancer
+    argocd.argoproj.io/sync-wave: "5"
+
+    # Cert-Manager: Usa Let's Encrypt Production
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+
+    # ExternalDNS: Crea registro DNS automáticamente en Route53
+    external-dns.alpha.kubernetes.io/hostname: pihole.cloudsanchez.com
+
+    # Nginx Ingress - Configuración para pihole
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+
+    # pihole usa certificado auto-firmado, no validar
+    nginx.ingress.kubernetes.io/proxy-ssl-verify: "false"
+
+    # Websocket support para noVNC console
+    nginx.ingress.kubernetes.io/websocket-services: "pihole-external"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+
+    # Permitir upload de ISOs grandes
+    nginx.ingress.kubernetes.io/proxy-body-size: "10240m"
+
+spec:
+  ingressClassName: nginx
+
+  tls:
+    - hosts:
+        - pihole.cloudsanchez.com
+      secretName: pihole-cloudsanchez-tls # Cert-Manager creará este certificado
+
+  rules:
+    - host: pihole.cloudsanchez.com
+      http:
+        paths:
+          - path: /admin/login
+            pathType: Prefix
+            backend:
+              service:
+                name: pihole-external
+                port:
+                  number: 8006
