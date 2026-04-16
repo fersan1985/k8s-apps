@@ -1,45 +1,70 @@
 ---
-# Self-Signed ClusterIssuer
-# Usa este para homelab con dominios .home.local
+# Let's Encrypt Production con DNS-01 Challenge (Route53)
+# Usa este para dominios públicos con certificados válidos
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  acme:
+    # Server de Let's Encrypt Production
+    server: https://acme-v02.api.letsencrypt.org/directory
+
+    # Email para notificaciones de expiración
+    email: fernando@sanchezmail.com
+
+    # Secret para almacenar la cuenta ACME
+    privateKeySecretRef:
+      name: letsencrypt-prod-account-key
+
+    # Solvers: DNS-01 usando Route53
+    solvers:
+      - dns01:
+          route53:
+            region: us-east-1 # Ajusta según tu región
+            # AWS Access Key ID (el Secret Key está en el Secret)
+            accessKeyID: AKIAXGD363S54VEO6D5L # CAMBIAR ESTO
+            secretAccessKeySecretRef:
+              name: cert-manager-route53
+              key: secret-access-key
+        selector:
+          dnsZones:
+            - sanchezcloud.com
+---
+# Let's Encrypt Staging (para testing)
+# Usa este primero para probar que todo funciona
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: YOUR_EMAIL@example.com # CAMBIAR ESTO
+    privateKeySecretRef:
+      name: letsencrypt-staging-account-key
+    solvers:
+      - dns01:
+          route53:
+            region: us-east-1
+            accessKeyID: AKIAXGD363S54VEO6D5L # CAMBIAR ESTO
+            secretAccessKeySecretRef:
+              name: cert-manager-route53
+              key: secret-access-key
+        selector:
+          dnsZones:
+            - sanchezcloud.com
+---
+# Self-Signed (para desarrollo local sin internet)
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: selfsigned-issuer
   annotations:
-    argocd.argoproj.io/sync-wave: "3"  # Después de cert-manager
+    argocd.argoproj.io/sync-wave: "3"
 spec:
   selfSigned: {}
----
-# Let's Encrypt Staging (para testing)
-# Usa este solo si tienes un dominio público y quieres probar Let's Encrypt
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: letsencrypt-staging
-spec:
-  acme:
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
-    email: tu-email@example.com  # CAMBIAR ESTO
-    privateKeySecretRef:
-      name: letsencrypt-staging
-    solvers:
-    - http01:
-        ingress:
-          class: nginx
----
-# Let's Encrypt Production
-# Usa este solo para dominios públicos en producción
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: letsencrypt-prod
-spec:
-  acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
-    email: tu-email@example.com  # CAMBIAR ESTO
-    privateKeySecretRef:
-      name: letsencrypt-prod
-    solvers:
-    - http01:
-        ingress:
-          class: nginx
