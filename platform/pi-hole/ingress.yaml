@@ -31,7 +31,7 @@ spec:
     - host: pihole.cloudsanchez.com
       http:
         paths:
-          - path: /admin
+          - path: /
             pathType: Prefix
             backend:
               service:
