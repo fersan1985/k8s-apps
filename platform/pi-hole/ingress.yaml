@@ -19,6 +19,9 @@ metadata:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
 
+    # Redirigir root a /admin
+    nginx.ingress.kubernetes.io/app-root: "/admin"
+
 spec:
   ingressClassName: nginx
 
