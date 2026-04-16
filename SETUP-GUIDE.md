@@ -6,14 +6,14 @@ Guía completa para desplegar el stack de plataforma con GitOps.
 
 ```
 ┌─────────────────────┐
-│   sanchezcloud.com  │  (Route53 - AWS)
+│   cloudsanchez.com  │  (Route53 - AWS)
 │   DNS Zone          │
 └──────────┬──────────┘
            │
            ▼
 ┌─────────────────────┐
 │   ExternalDNS       │  Sincroniza Ingress → Route53
-│                     │  argocd.sanchezcloud.com → 192.168.0.50
+│                     │  argocd.cloudsanchez.com → 192.168.0.50
 └─────────────────────┘
            │
            ▼
@@ -45,7 +45,7 @@ Guía completa para desplegar el stack de plataforma con GitOps.
 ### 1. AWS Setup
 
 #### a. Route53 Hosted Zone
-- Crea una Hosted Zone para `sanchezcloud.com` en Route53
+- Crea una Hosted Zone para `cloudsanchez.com` en Route53
 - Anota el Hosted Zone ID
 
 #### b. IAM User con permisos
@@ -182,7 +182,7 @@ git push
 
 ArgoCD sincronizará y:
 1. MetalLB asignará IP 192.168.0.50 al Ingress Controller
-2. ExternalDNS creará `argocd.sanchezcloud.com → 192.168.0.50` en Route53
+2. ExternalDNS creará `argocd.cloudsanchez.com → 192.168.0.50` en Route53
 3. Cert-Manager solicitará certificado SSL de Let's Encrypt
 4. Let's Encrypt validará vía DNS-01 challenge
 5. Certificado válido listo!
@@ -206,7 +206,7 @@ kubectl get svc -n kube-system | grep ingress
 kubectl logs -n external-dns -l app.kubernetes.io/name=external-dns
 
 # Verificar DNS (desde Route53 o usando dig)
-dig argocd.sanchezcloud.com
+dig argocd.cloudsanchez.com
 
 # Debería devolver: 192.168.0.50
 ```
@@ -218,7 +218,7 @@ dig argocd.sanchezcloud.com
 kubectl get certificate -A
 
 # Ver detalles
-kubectl describe certificate argocd-sanchezcloud-tls -n argocd
+kubectl describe certificate argocd-cloudsanchez-tls -n argocd
 
 # Debería mostrar: Ready = True
 ```
@@ -227,7 +227,7 @@ kubectl describe certificate argocd-sanchezcloud-tls -n argocd
 
 ```bash
 # Desde tu navegador
-https://argocd.sanchezcloud.com
+https://argocd.cloudsanchez.com
 
 # Debería:
 # - Cargar ArgoCD sin warning de certificado
@@ -248,15 +248,15 @@ metadata:
   namespace: monitoring
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    external-dns.alpha.kubernetes.io/hostname: grafana.sanchezcloud.com
+    external-dns.alpha.kubernetes.io/hostname: grafana.cloudsanchez.com
 spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - grafana.sanchezcloud.com
-    secretName: grafana-sanchezcloud-tls
+    - grafana.cloudsanchez.com
+    secretName: grafana-cloudsanchez-tls
   rules:
-  - host: grafana.sanchezcloud.com
+  - host: grafana.cloudsanchez.com
     http:
       paths:
       - path: /
@@ -269,9 +269,9 @@ spec:
 ```
 
 Commit, push, y automáticamente tendrás:
-- DNS: `grafana.sanchezcloud.com → 192.168.0.50`
+- DNS: `grafana.cloudsanchez.com → 192.168.0.50`
 - SSL: Certificado válido de Let's Encrypt
-- Acceso: `https://grafana.sanchezcloud.com`
+- Acceso: `https://grafana.cloudsanchez.com`
 
 ## Troubleshooting
 

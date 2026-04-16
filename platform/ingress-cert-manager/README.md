@@ -51,11 +51,11 @@ kind: Ingress
 metadata:
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-staging"  # Staging primero
-    external-dns.alpha.kubernetes.io/hostname: test.sanchezcloud.com
+    external-dns.alpha.kubernetes.io/hostname: test.cloudsanchez.com
 spec:
   tls:
   - hosts:
-    - test.sanchezcloud.com
+    - test.cloudsanchez.com
     secretName: test-tls
 ```
 
@@ -70,7 +70,7 @@ kubectl describe certificate test-tls -n <namespace>
 kubectl logs -n cert-manager -l app=cert-manager
 
 # Verificar DNS
-dig test.sanchezcloud.com
+dig test.cloudsanchez.com
 ```
 
 ### Producción con Let's Encrypt Production
@@ -83,18 +83,18 @@ kind: Ingress
 metadata:
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"  # Production
-    external-dns.alpha.kubernetes.io/hostname: argocd.sanchezcloud.com
+    external-dns.alpha.kubernetes.io/hostname: argocd.cloudsanchez.com
 spec:
   tls:
   - hosts:
-    - argocd.sanchezcloud.com
-    secretName: argocd-sanchezcloud-tls
+    - argocd.cloudsanchez.com
+    secretName: argocd-cloudsanchez-tls
 ```
 
 ## Flujo completo
 
 1. **MetalLB** asigna IP fija (ej: 192.168.0.50) al Ingress Controller
-2. **ExternalDNS** crea registro A en Route53: `argocd.sanchezcloud.com` → `192.168.0.50`
+2. **ExternalDNS** crea registro A en Route53: `argocd.cloudsanchez.com` → `192.168.0.50`
 3. **Cert-Manager** solicita certificado a Let's Encrypt usando DNS-01 challenge:
    - Let's Encrypt pide validar dominio via DNS
    - Cert-Manager crea registro TXT en Route53
@@ -109,16 +109,16 @@ spec:
 kubectl get certificate -A
 
 # Ver detalles de un certificado
-kubectl describe certificate argocd-sanchezcloud-tls -n argocd
+kubectl describe certificate argocd-cloudsanchez-tls -n argocd
 
 # Ver logs de cert-manager
 kubectl logs -n cert-manager -l app=cert-manager --tail=50
 
 # Probar HTTPS
-curl -I https://argocd.sanchezcloud.com
+curl -I https://argocd.cloudsanchez.com
 
 # Verificar certificado SSL
-openssl s_client -connect argocd.sanchezcloud.com:443 -servername argocd.sanchezcloud.com
+openssl s_client -connect argocd.cloudsanchez.com:443 -servername argocd.cloudsanchez.com
 ```
 
 ## Troubleshooting

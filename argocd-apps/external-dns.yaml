@@ -26,7 +26,7 @@ spec:
 
         # Dominio a gestionar
         domainFilters:
-          - sanchezcloud.com
+          - cloudsanchez.com
 
         # Policy: solo crear registros, no modificar ni eliminar
         # Cambia a "sync" cuando estés seguro que funciona correctamente

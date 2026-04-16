@@ -14,7 +14,7 @@ metadata:
     # Para testing inicial, usa: letsencrypt-staging
 
     # ExternalDNS: Crea registro DNS automáticamente en Route53
-    external-dns.alpha.kubernetes.io/hostname: argocd.sanchezcloud.com
+    external-dns.alpha.kubernetes.io/hostname: argocd.cloudsanchez.com
 
     # Nginx Ingress
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
@@ -25,11 +25,11 @@ spec:
 
   tls:
   - hosts:
-    - argocd.sanchezcloud.com
-    secretName: argocd-sanchezcloud-tls  # Cert-Manager creará este certificado
+    - argocd.cloudsanchez.com
+    secretName: argocd-cloudsanchez-tls  # Cert-Manager creará este certificado
 
   rules:
-  - host: argocd.sanchezcloud.com
+  - host: argocd.cloudsanchez.com
     http:
       paths:
       - path: /

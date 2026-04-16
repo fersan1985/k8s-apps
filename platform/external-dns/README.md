@@ -51,7 +51,7 @@ kubectl apply -f platform/external-dns/aws-credentials-secret.yaml
 
 ### 3. Verificar Hosted Zone en Route53
 
-Asegúrate que la zona `sanchezcloud.com` existe en Route53.
+Asegúrate que la zona `cloudsanchez.com` existe en Route53.
 
 ## Instalación
 
@@ -76,11 +76,11 @@ metadata:
   name: argocd-ingress
   namespace: argocd
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: argocd.sanchezcloud.com
+    external-dns.alpha.kubernetes.io/hostname: argocd.cloudsanchez.com
 spec:
   ingressClassName: nginx
   rules:
-  - host: argocd.sanchezcloud.com
+  - host: argocd.cloudsanchez.com
     http:
       paths:
       - path: /
@@ -93,7 +93,7 @@ spec:
 ```
 
 ExternalDNS creará automáticamente un registro A en Route53:
-- `argocd.sanchezcloud.com` → IP del LoadBalancer (asignada por MetalLB)
+- `argocd.cloudsanchez.com` → IP del LoadBalancer (asignada por MetalLB)
 
 ### Verificación
 
@@ -102,7 +102,7 @@ ExternalDNS creará automáticamente un registro A en Route53:
 kubectl logs -n external-dns -l app.kubernetes.io/name=external-dns
 
 # Verificar registros DNS creados
-dig argocd.sanchezcloud.com
+dig argocd.cloudsanchez.com
 ```
 
 ## Policy Modes

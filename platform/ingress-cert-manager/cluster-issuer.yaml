@@ -31,7 +31,7 @@ spec:
               key: secret-access-key
         selector:
           dnsZones:
-            - sanchezcloud.com
+            - cloudsanchez.com
 ---
 # Let's Encrypt Staging (para testing)
 # Usa este primero para probar que todo funciona
@@ -57,7 +57,7 @@ spec:
               key: secret-access-key
         selector:
           dnsZones:
-            - sanchezcloud.com
+            - cloudsanchez.com
 ---
 # Self-Signed (para desarrollo local sin internet)
 apiVersion: cert-manager.io/v1
