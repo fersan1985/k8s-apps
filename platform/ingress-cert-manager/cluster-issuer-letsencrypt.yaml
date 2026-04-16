@@ -1,0 +1,70 @@
+---
+# Let's Encrypt Production con DNS-01 Challenge (Route53)
+# Usa este para dominios públicos con certificados válidos
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  acme:
+    # Server de Let's Encrypt Production
+    server: https://acme-v02.api.letsencrypt.org/directory
+    
+    # Email para notificaciones de expiración
+    email: YOUR_EMAIL@example.com  # CAMBIAR ESTO
+    
+    # Secret para almacenar la cuenta ACME
+    privateKeySecretRef:
+      name: letsencrypt-prod-account-key
+    
+    # Solvers: DNS-01 usando Route53
+    solvers:
+    - dns01:
+        route53:
+          region: us-east-1  # Ajusta según tu región
+          # AWS Access Key ID (el Secret Key está en el Secret)
+          accessKeyID: YOUR_AWS_ACCESS_KEY_ID  # CAMBIAR ESTO
+          secretAccessKeySecretRef:
+            name: cert-manager-route53
+            key: secret-access-key
+      selector:
+        dnsZones:
+          - sanchezcloud.com
+---
+# Let's Encrypt Staging (para testing)
+# Usa este primero para probar que todo funciona
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: YOUR_EMAIL@example.com  # CAMBIAR ESTO
+    privateKeySecretRef:
+      name: letsencrypt-staging-account-key
+    solvers:
+    - dns01:
+        route53:
+          region: us-east-1
+          accessKeyID: YOUR_AWS_ACCESS_KEY_ID  # CAMBIAR ESTO
+          secretAccessKeySecretRef:
+            name: cert-manager-route53
+            key: secret-access-key
+      selector:
+        dnsZones:
+          - sanchezcloud.com
+---
+# Self-Signed (para desarrollo local sin internet)
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned-issuer
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  selfSigned: {}
