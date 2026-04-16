@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: argocd-config
+  name: platform-config
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "4"
@@ -12,9 +12,10 @@ spec:
   source:
     repoURL: https://github.com/fersan1985/k8s-apps.git
     targetRevision: main
-    path: platform/argocd
+    path: platform
     directory:
-      include: '{ingress.yaml}'
+      recurse: true
+      include: '{cluster-issuer.yaml,ingress.yaml}'
   destination:
     server: https://kubernetes.default.svc
   syncPolicy:

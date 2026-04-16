@@ -10,17 +10,41 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/fersan1985/k8s-apps.git
-    targetRevision: main
-    path: platform/prometheus-stack
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    targetRevision: 56.0.0
+    helm:
+      valuesObject:
+        prometheus:
+          prometheusSpec:
+            retention: 30d
+            resources:
+              requests:
+                cpu: 200m
+                memory: 512Mi
+              limits:
+                cpu: 1000m
+                memory: 2Gi
+        grafana:
+          enabled: true
+          adminPassword: admin
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
   destination:
     server: https://kubernetes.default.svc
+    namespace: monitoring
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true
     retry:
       limit: 5
       backoff:
