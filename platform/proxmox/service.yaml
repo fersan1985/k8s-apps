@@ -1,0 +1,32 @@
+---
+# Service para Proxmox (servidor externo al cluster)
+apiVersion: v1
+kind: Service
+metadata:
+  name: proxmox-external
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  type: ClusterIP
+  ports:
+  - name: https
+    port: 8006
+    targetPort: 8006
+    protocol: TCP
+---
+# Endpoints apuntando al servidor Proxmox externo
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: proxmox-external
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+subsets:
+  - addresses:
+      - ip: 192.168.0.22  # IP del servidor Proxmox
+    ports:
+      - name: https
+        port: 8006
+        protocol: TCP

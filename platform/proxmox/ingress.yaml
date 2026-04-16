@@ -1,0 +1,58 @@
+---
+# Ingress para Proxmox con Let's Encrypt SSL + ExternalDNS
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: proxmox-ingress
+  namespace: default
+  annotations:
+    # Sync wave - después de ClusterIssuer y LoadBalancer
+    argocd.argoproj.io/sync-wave: "5"
+
+    # Cert-Manager: Usa Let's Encrypt Production
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+
+    # ExternalDNS: Crea registro DNS automáticamente en Route53
+    external-dns.alpha.kubernetes.io/hostname: proxmox.cloudsanchez.com
+
+    # Nginx Ingress - Configuración para Proxmox
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+
+    # Proxmox usa certificado auto-firmado, no validar
+    nginx.ingress.kubernetes.io/proxy-ssl-verify: "false"
+
+    # Websocket support para noVNC console
+    nginx.ingress.kubernetes.io/websocket-services: "proxmox-external"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+
+    # Permitir upload de ISOs grandes
+    nginx.ingress.kubernetes.io/proxy-body-size: "10240m"
+
+    # Headers adicionales para Proxmox
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Real-IP $remote_addr;
+
+spec:
+  ingressClassName: nginx
+
+  tls:
+  - hosts:
+    - proxmox.cloudsanchez.com
+    secretName: proxmox-cloudsanchez-tls  # Cert-Manager creará este certificado
+
+  rules:
+  - host: proxmox.cloudsanchez.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: proxmox-external
+            port:
+              number: 8006
