@@ -17,18 +17,7 @@ metadata:
 
     # Nginx Ingress - Configuración para pihole
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-
-    # pihole usa certificado auto-firmado, no validar
-    nginx.ingress.kubernetes.io/proxy-ssl-verify: "false"
-
-    # Websocket support para noVNC console
-    nginx.ingress.kubernetes.io/websocket-services: "pihole-external"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-
-    # Permitir upload de ISOs grandes
-    nginx.ingress.kubernetes.io/proxy-body-size: "10240m"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
 
 spec:
   ingressClassName: nginx
@@ -42,10 +31,10 @@ spec:
     - host: pihole.cloudsanchez.com
       http:
         paths:
-          - path: /admin/login
+          - path: /admin
             pathType: Prefix
             backend:
               service:
                 name: pihole-external
                 port:
-                  number: 8006
+                  number: 80

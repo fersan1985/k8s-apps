@@ -10,7 +10,7 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - name: https
+  - name: http
     port: 80
     targetPort: 80
     protocol: TCP
@@ -27,6 +27,6 @@ subsets:
   - addresses:
       - ip: 192.168.0.3  # IP del servidor pihole
     ports:
-      - name: https
-        port: 8006
+      - name: http
+        port: 80
         protocol: TCP
